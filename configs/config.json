@@ -7,6 +7,6 @@
     "JiraUser" : "",
     "JiraPass" : "",
     "JiraToken" : "",
-    "VersionsToKeep": 5,
+    "VersionsToKeep": 5
   }
 }
