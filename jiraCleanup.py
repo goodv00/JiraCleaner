@@ -39,8 +39,8 @@ to_be_deleted = [] #list of issue keys to be deleted
 
 for software_name in issue_dict: #take each package to determine the issue keys to be deleted
     issue_dict[software_name].sort(reverse=True) #sorts the tuplets in descending order (first element is the highest version number)
-    if len(issue_dict[software_name])>5:
-        to_be_deleted.extend(issue_dict[software_name][5:])
+    if len(issue_dict[software_name])>jira_config['VersionsToKeep']:
+        to_be_deleted.extend(issue_dict[software_name][jira_config['VersionsToKeep']:])
 
 
 #This will pull the trigger (delete all in to_be_deleted) from the Jira Board
