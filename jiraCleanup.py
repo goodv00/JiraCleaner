@@ -52,7 +52,7 @@ try:
             jira.delete_issue(issue[1])
             print("Deleted")
             print("Thanks for choosing the Jira cleaner, see you next time")
-    else if ans.lower() == "n":
+    elif ans.lower() == "n":
         print("Maybe next time...")
     else:
         print("No valid answer...")
