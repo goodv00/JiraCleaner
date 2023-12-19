@@ -50,8 +50,9 @@ try:
     if ans.lower() == "y":
         for issue in to_be_deleted:
             jira.delete_issue(issue[1])
-            print("Deleted")
-            print("Thanks for choosing the Jira cleaner, see you next time")
+            
+        print("Done deleting")
+        print("Thanks for choosing the Jira cleaner, see you next time")
     elif ans.lower() == "n":
         print("Maybe next time...")
     else:
