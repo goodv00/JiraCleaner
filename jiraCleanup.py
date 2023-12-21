@@ -69,7 +69,6 @@ try:
                 printout += "\t\t" + version + "\n"
             print(printout)
 
-        print("Done deleting")
     elif ans1.lower() == "n":
         print("Maybe next time...")
     else:
