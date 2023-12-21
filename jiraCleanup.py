@@ -12,40 +12,46 @@ config_path = f'{dir_path}{sys_path}configs{sys_path}config.json'
 jira_config = json.load(open(config_path))["JIRA"]
 
 # Add Jira connection
-# jira = JIRA.Jira(url=jira_config["JiraBaseURL"], username=jira_config["JiraUser"], password=jira_config["JiraPass"]) #Use this method if you want to login with username and PW
-
-
+# #Use this method if you want to login with username and PW
+# jira = JIRA.Jira(url=jira_config["JiraBaseURL"], username=jira_config["JiraUser"], password=jira_config["JiraPass"])
+# Use this method if you want to login with a token
 jira = JIRA.Jira(url=jira_config["JiraBaseURL"], token=jira_config["JiraToken"])
+
+
 query = 'project=%s' % (jira_config['ProjectKey'])
-issue_count = jira.jql(query)["total"] #fetch how many issues there are (mind you, this method only returns issues that are unresolved -> Cannot use for cleanup)
-issues = jira.get_all_project_issues("WASP", fields='*all', limit = issue_count)
+# Fetches how many issues there are (mind you, this method only returns issues that are unresolved)
+issue_count = jira.jql(query)["total"]
+issues = jira.get_all_project_issues("WASP", fields='*all', limit=issue_count)
 
-issue_dict = {} #invoke a dictionary for the sorting
+issue_dict = {}  # Invokes a dictionary for the sorting
 
-for issue in issues: #Let's sort through the issue summaries and list versions of each SW package
+for issue in issues:  # Let's sort through the issue summaries and list versions of each SW package
     if issue["fields"]["status"]["name"] == "Production":
         summary_split = issue["fields"]["summary"].split("@")
-        buffer = [[int(item) for item in summary_split[1].split(".")]] + [issue["key"]] #ATTENTION -> You need this weird structure of the list in order for .sort() to work
-        try: issue_dict[summary_split[0]].append(buffer)
-        except: issue_dict[summary_split[0]] = [buffer] #ATTENTION -> Buffer needs to be added as a tuplet with the square brackets to form the first element, otherwise sorting won't work
+        # ATTENTION -> You need this weird structure of the list in order for .sort() to work
+        buffer = [[int(item) for item in summary_split[1].split(".")]] + [issue["key"]]
+        try:
+            issue_dict[summary_split[0]].append(buffer)
+        except:
+            # ATTENTION -> Buffer needs to be added as a list with the [] to form the first element
+            issue_dict[summary_split[0]] = [buffer]
 '''
 returns a dictionary with the structure: 
-issue_dict =    {"SOFTWARE NAME": [["VERSION",","JIRA ISSUE KEY"],["VERSION"...
+issue_dict =    {"SOFTWARE NAME": [["VERSION as [MAJOR, MINOR, DIST]",","JIRA ISSUE KEY"],["VERSION"...
                  "SOFTWARE NAME": [["VERSION","JIRA ISSUE KEY"], ... }
 The issue key is needed for the deletion request
 '''
 
-to_be_deleted = [] #list of issue keys to be deleted
+to_be_deleted = []  # List of issue keys to be deleted
 
-for software_name in issue_dict: #take each package to determine the issue keys to be deleted
-    issue_dict[software_name].sort(reverse=True) #sorts the tuplets in descending order (first element is the highest version number)
+for software_name in issue_dict:  # Takes each package to determine the issue keys to be deleted
+    issue_dict[software_name].sort(reverse=True)  # Sorts the version numbers in descending order
     if len(issue_dict[software_name])>jira_config['VersionsToKeep']:
         to_be_deleted.extend(issue_dict[software_name][jira_config['VersionsToKeep']:])
 
 
-#This will pull the trigger (delete all in to_be_deleted) from the Jira Board
+# This will pull the trigger (deletes all in to_be_deleted) from the Jira Board
 ans = input("Are you sure, that you want to delete old issue [y/n] ?")
-
 try:
     if ans.lower() == "y":
         for issue in to_be_deleted:
