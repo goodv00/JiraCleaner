@@ -24,22 +24,23 @@ def jira_init():
         issue_count = jira.jql(query)["total"]
         print('Authentication success')
         print(f'Jira issues found: {issue_count}')
+        return jira
 
-
-    except Exception as e:
+    except:
         # Use this method if you want to login with a token
         jira = JIRA.Jira(url=jira_config["JiraBaseURL"],
                          token=jira_config["JiraToken"]
         )
         print('Trying to use Jira Token')
-        issue_count = jira.jql(query)["total"]
-        print(f'Jira issues found: {issue_count}')
+        try:
+            issue_count = jira.jql(query)["total"]
+            print(f'Jira issues found: {issue_count}')
+            return jira
 
-    except:
-        print('Authentication failed')
-        return
+        except:
+            print('Authentication failed')
+            return
 
-    return jira
 def jira_clean(jira):
     query = 'project=%s' % (jira_config['ProjectKey'])
     issue_count = jira.jql(query)["total"]
